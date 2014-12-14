@@ -43,8 +43,6 @@ foreign import ccall unsafe "bdd.h bdd_restrict" bdd_restrict :: Bdd -> Bdd -> I
 
 foreign import ccall unsafe "bdd.h bdd_satcount" bdd_satcount :: Bdd -> IO CDouble
 
-foreign import ccall unsafe "bdd.h bdd_restrict_probability" bdd_restrict_probability :: Ptr CInt -> CDouble -> Bdd -> IO CDouble
-
 foreign import ccall unsafe "bdd.h bdd_satcountln" bdd_satcountln :: Bdd -> IO CDouble
 foreign import ccall unsafe "bdd.h bdd_nodecount" bdd_nodecount :: Bdd -> IO CInt
 

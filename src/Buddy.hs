@@ -8,7 +8,6 @@ module Buddy
 , (&&), (||), not
 , implies, nand, nor, restrict
 , satcount, satcountln
-, restrict_probability
 , and, or
 , and_plain, or_plain
 , monadic
@@ -41,23 +40,6 @@ newtype Transaction v a =
   Transaction { unTransaction 
                 :: StateT (Store v) IO a } 
   deriving Monad
-
-restrict_probability
-  :: Ord v => (M.Map v Bool) 
-     -> Double
-     -> BDD v 
-     -> Transaction v CDouble
-restrict_probability p prob (BDD x) = Transaction $ do
-    Store m <- get
-    let   mm = M.fromList 
-             $ do (v,i) <- M.toList m ; return (i,v)
-          a = do (i,v) <- M.toAscList mm
-                 return $ case M.lookup (mm M.! i) p of
-                      Nothing -> -1
-                      Just False -> 0
-                      Just True -> 1
-    lift $ withArray a $ \ a -> 
-      bdd_restrict_probability a (realToFrac prob) x 
 
 satcount (BDD x) = Transaction $ lift $ bdd_satcount x
 satcountln (BDD x) = Transaction $ lift $ bdd_satcountln x
@@ -92,8 +74,8 @@ init vars = flip execStateT undefined $ do
     let m = M.fromList $ zip vars [0..] 
     put $ Store m 
     let s = fromIntegral $ M.size m
-    -- lift $ bdd_init (s * 256) (10^4)
-    lift $ bdd_init (2 * 10^8) (2 * 10^6)
+    lift $ bdd_init (10 ^ 6) (10 ^ 4) -- ??
+    -- lift $ bdd_init (2 * 10^8) (2 * 10^6)
     lift $ bdd_setvarnum s
 
 done s = flip execStateT s $ do
