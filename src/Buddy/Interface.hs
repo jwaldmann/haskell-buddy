@@ -37,9 +37,24 @@ foreign import ccall unsafe "bdd.h bdd_nithvar" bdd_nithvar :: CInt -> IO Bdd
 foreign import ccall unsafe "bdd.h bdd_addref" bdd_addref :: Bdd -> IO Bdd
 foreign import ccall unsafe "bdd.h bdd_delref" bdd_delref :: Bdd -> IO Bdd
 
+foreign import ccall unsafe "bdd.h bdd_var" bdd_var :: Bdd -> IO CInt
+foreign import ccall unsafe "bdd.h bdd_low" bdd_low :: Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_high" bdd_high :: Bdd -> IO Bdd
+
 foreign import ccall unsafe "bdd.h bdd_not" bdd_not :: Bdd -> IO Bdd
 foreign import ccall unsafe "bdd.h bdd_apply" bdd_apply :: Bdd -> Bdd -> CInt -> IO Bdd
+
+foreign import ccall unsafe "bdd.h bdd_and" bdd_and :: Bdd -> Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_or" bdd_or :: Bdd -> Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_xor" bdd_xor :: Bdd -> Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_imp" bdd_imp :: Bdd -> Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_biimp" bdd_biimp :: Bdd -> Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_ite" bdd_ite :: Bdd -> Bdd -> Bdd -> IO Bdd
+
 foreign import ccall unsafe "bdd.h bdd_restrict" bdd_restrict :: Bdd -> Bdd -> IO Bdd
+
+foreign import ccall unsafe "bdd.h bdd_satone" bdd_satone :: Bdd -> IO Bdd
+foreign import ccall unsafe "bdd.h bdd_fullsatone" bdd_fullsatone :: Bdd -> IO Bdd
 
 foreign import ccall unsafe "bdd.h bdd_satcount" bdd_satcount :: Bdd -> IO CDouble
 

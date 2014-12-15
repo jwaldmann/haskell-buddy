@@ -7,9 +7,9 @@ module Buddy
 , unit, constant
 , (&&), (||), not
 , implies, nand, nor, restrict
+, satisfiable, model
 , satcount, satcountln
 , and, or
-, and_plain, or_plain
 , monadic
 , dispose
 , printstat, message
@@ -26,6 +26,7 @@ import Prelude hiding ( and, or, not, (&&), (||), init )
 import qualified Prelude
 import Control.Monad ( foldM, sequence, void )  
 import Control.Monad.State.Strict
+import Control.Applicative 
 
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
@@ -34,19 +35,62 @@ import Data.Time
 
 newtype BDD v = BDD { unBDD :: Bdd }
 
-newtype Store v = Store ( Map v CInt )
+data Store v = Store { fore :: Map v CInt
+                     , back :: Map CInt v }  
 
 newtype Transaction v a = 
   Transaction { unTransaction 
                 :: StateT (Store v) IO a } 
-  deriving Monad
+  deriving (Functor, Monad)
 
+satcount :: BDD v -> Transaction v CDouble
 satcount (BDD x) = Transaction $ lift $ bdd_satcount x
+
+satcountln :: BDD v -> Transaction v CDouble
 satcountln (BDD x) = Transaction $ lift $ bdd_satcountln x
 
+satisfiable :: BDD v -> Transaction v Bool
+satisfiable (BDD x) = Transaction $ do
+    f <- lift bdd_false
+    return $ f /= x
+
+terminal :: BDD v -> Transaction v Bool
+terminal (BDD x) = Transaction $ do
+    f <- lift bdd_false
+    t <- lift bdd_true
+    return $ (x == f) Prelude.|| (x == t)
+
+model :: Ord v => BDD v -> Transaction v (M.Map v Bool)
+model b = do
+    let walk b = do
+          t <- terminal b
+          if t then return M.empty
+               else do v <- var b
+                       l <- low b ; ls <- satisfiable l
+                       h <- high b ; hs <- satisfiable h
+                       if ls then M.insert v False <$> walk l
+                             else M.insert v True  <$> walk h
+    bf <- fullsatone b
+    walk bf
+
+fullsatone :: BDD v -> Transaction v (BDD v)
+fullsatone (BDD x) = Transaction $ lift $ BDD <$> bdd_fullsatone x
+
+var :: BDD v -> Transaction v v
+var (BDD x) = Transaction $ do
+   s <- get
+   v <- lift $ bdd_var x
+   return $ back s M.! v
+
+low :: BDD v -> Transaction v (BDD v)
+low (BDD x) = Transaction $ lift $ BDD <$> bdd_low x
+
+high :: BDD v -> Transaction v (BDD v)
+high (BDD x) = Transaction $ lift $ BDD <$> bdd_high x
+    
 unit v pos = Transaction $ do
-    Store m <- get
-    case M.lookup v m of
+    s <- get
+    case M.lookup v $ fore s of
         Nothing -> error "Buddy.unit: undeclared variable"
         Just i -> lift $ fmap BDD 
                   $ case pos of 
@@ -59,8 +103,8 @@ constant pos = Transaction $ lift $ fmap BDD $ case pos of
 helper = Transaction . lift . fmap BDD . referenced
 
 not (BDD x) = helper $ bdd_not x
-BDD x && BDD y = helper $ bdd_apply x y bddop_and
-BDD x || BDD y = helper $ bdd_apply x y bddop_or
+BDD x && BDD y = helper $ bdd_and x y
+BDD x || BDD y = helper $ bdd_or x y
 nand (BDD x) (BDD y) = helper $ bdd_apply x y bddop_nand
 nor (BDD x) (BDD y) = helper $ bdd_apply x y bddop_nor
 implies (BDD x) (BDD y) = helper $ bdd_apply x y bddop_imp
@@ -71,9 +115,10 @@ referenced a = do b <- a ; bdd_addref b
 
 init :: Ord v => [v] -> IO ( Store v )
 init vars = flip execStateT undefined $ do
-    let m = M.fromList $ zip vars [0..] 
-    put $ Store m 
-    let s = fromIntegral $ M.size m
+    let f = M.fromList $ zip vars [0..]
+        b = M.fromList $ zip [0..] vars
+    put $ Store { fore = f, back = b }
+    let s = fromIntegral $ M.size f
     lift $ bdd_init (10 ^ 6) (10 ^ 4) -- ??
     -- lift $ bdd_init (2 * 10^8) (2 * 10^6)
     lift $ bdd_setvarnum s
@@ -91,9 +136,6 @@ run vars action = do
 execute s action = flip evalStateT s $ do
     unTransaction action
   
-and_plain [] = constant  True ; and_plain (x:xs) = foldM (&&) x xs
-or_plain  [] = constant False ; or_plain  (x:xs) = foldM (||) x xs
-
 and xs = fold_with_dispose True (&&) xs
 or  xs = fold_with_dispose False (||) xs
 

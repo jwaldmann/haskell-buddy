@@ -57,10 +57,13 @@ main = do
     mainf $ read arg
 
 mainf n = do 
-    c <- B.run (positions n) $ do
+    (c,m) <- B.run (positions n) $ do
          b <- board n
-         B.satcount b
+         c <- B.satcount b
+         m <- B.model b
+         return (c, m)
     print c
+    print $ M.filter id m
     B.printstat
     
 
