@@ -5,9 +5,9 @@ module Buddy
 ( BDD, Transaction, Store
 , init, execute, done, run
 , unit, constant
-, (&&), (||), not
-, implies, nand, nor, restrict
-, satisfiable, model
+, (&&), (||), not, xor
+, imp, biimp, nand, nor, restrict
+, satisfiable, model, fold
 , satcount, satcountln
 , and, or
 , monadic
@@ -33,7 +33,7 @@ import qualified Data.Map.Strict as M
 
 import Data.Time
 
-newtype BDD v = BDD { unBDD :: Bdd }
+newtype BDD v = BDD { unBDD :: Bdd } deriving (Eq, Ord)
 
 data Store v = Store { fore :: Map v CInt
                      , back :: Map CInt v }  
@@ -41,7 +41,7 @@ data Store v = Store { fore :: Map v CInt
 newtype Transaction v a = 
   Transaction { unTransaction 
                 :: StateT (Store v) IO a } 
-  deriving (Functor, Monad)
+  deriving (Functor, Monad, Applicative)
 
 satcount :: BDD v -> Transaction v CDouble
 satcount (BDD x) = Transaction $ lift $ bdd_satcount x
@@ -76,6 +76,27 @@ model b = do
 fullsatone :: BDD v -> Transaction v (BDD v)
 fullsatone (BDD x) = Transaction $ lift $ BDD <$> bdd_fullsatone x
 
+fold :: (Bool -> a)
+     -> (v -> a -> a -> a)
+     -> BDD v    
+     -> Transaction v a
+fold leaf branch b = do
+    let walk c b = do
+          t <- terminal b
+          if t then do
+            s <- satisfiable b
+            return ( leaf s, c)
+          else case M.lookup b c of
+              Just res -> return (res, c)
+              Nothing -> do
+                 (l, c1) <- low b >>= walk c
+                 (r, c2) <- high b >>= walk c1
+                 v <- var b
+                 let res = branch v l r
+                     c3 = M.insert b res c2
+                 return (res, c3)
+    fst <$> walk M.empty b          
+
 var :: BDD v -> Transaction v v
 var (BDD x) = Transaction $ do
    s <- get
@@ -107,7 +128,9 @@ BDD x && BDD y = helper $ bdd_and x y
 BDD x || BDD y = helper $ bdd_or x y
 nand (BDD x) (BDD y) = helper $ bdd_apply x y bddop_nand
 nor (BDD x) (BDD y) = helper $ bdd_apply x y bddop_nor
-implies (BDD x) (BDD y) = helper $ bdd_apply x y bddop_imp
+xor (BDD x) (BDD y) = helper $ bdd_xor x y 
+imp (BDD x) (BDD y) = helper $ bdd_imp x y
+biimp (BDD x) (BDD y) = helper $ bdd_biimp x y 
 
 restrict (BDD x) (BDD y) = helper $ bdd_restrict x y
 
