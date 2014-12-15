@@ -142,7 +142,7 @@ init vars = flip execStateT undefined $ do
         b = M.fromList $ zip [0..] vars
     put $ Store { fore = f, back = b }
     let s = fromIntegral $ M.size f
-    lift $ bdd_init (10 ^ 6) (10 ^ 4) -- ??
+    lift $ bdd_init (10 ^ 7) (10 ^ 5) -- ??
     -- lift $ bdd_init (2 * 10^8) (2 * 10^6)
     lift $ bdd_setvarnum s
 
