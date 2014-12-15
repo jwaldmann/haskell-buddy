@@ -1,4 +1,4 @@
-name:                haskell-buddy
+name:                buddy
 version:             0.1.0.0
 synopsis:      BuDDy Haskell binding      
 description:   very simple binding for BDD library BuDDy
@@ -13,25 +13,25 @@ cabal-version:       >=1.10
 homepage:            https://github.com/jwaldmann/haskell-buddy
 
 extra-source-files:
-  cbits/bvec.h
-  cbits/tree.c
-  cbits/imatrix.c
-  cbits/kernel.h
-  cbits/prime.h
-  cbits/prime.c
-  cbits/cache.h
   cbits/bdd.h
-  cbits/bddtree.h
-  cbits/fdd.h
-  cbits/fdd.c
-  cbits/reorder.c
-  cbits/bddop.c
-  cbits/kernel.c
-  cbits/imatrix.h
   cbits/bddio.c
-  cbits/cache.c
+  cbits/bddop.c
+  cbits/bddtree.h
   cbits/bvec.c
+  cbits/bvec.h
+  cbits/cache.c
+  cbits/cache.h
+  cbits/fdd.c
+  cbits/fdd.h
+  cbits/imatrix.c
+  cbits/imatrix.h
+  cbits/kernel.c
+  cbits/kernel.h
   cbits/pairs.c
+  cbits/prime.c
+  cbits/prime.h
+  cbits/reorder.c
+  cbits/tree.c
 
 source-repository head
     type: git
@@ -60,15 +60,15 @@ library
   cc-options:       -w 
 
   c-sources:
-    cbits/tree.c
-    cbits/imatrix.c
-    cbits/prime.c
-    cbits/fdd.c
-    cbits/reorder.c
-    cbits/bddop.c
-    cbits/kernel.c
     cbits/bddio.c
-    cbits/cache.c
+    cbits/bddop.c
     cbits/bvec.c
+    cbits/cache.c
+    cbits/fdd.c
+    cbits/imatrix.c
+    cbits/kernel.c
     cbits/pairs.c
+    cbits/prime.c
+    cbits/reorder.c
+    cbits/tree.c
 
