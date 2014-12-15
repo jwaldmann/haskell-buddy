@@ -10,6 +10,7 @@ module Buddy
 , satisfiable, model, fold
 , satcount, satcountln
 , and, or
+, plain_and, plain_or
 , monadic
 , dispose
 , printstat, message
@@ -159,8 +160,14 @@ run vars action = do
 execute s action = flip evalStateT s $ do
     unTransaction action
   
-and xs = fold_with_dispose True (&&) xs
-or  xs = fold_with_dispose False (||) xs
+and xs = binary_fold_with_dispose True (&&) xs
+or  xs = binary_fold_with_dispose False (||) xs
+
+plain_and [] = constant True
+plain_and (x:xs) = foldM (&&) x xs
+
+plain_or [] = constant False
+plain_or (x:xs) = foldM (||) x xs
 
 -- and xs = binary_fold True (&&) xs
 -- or  xs = binary_fold False (||) xs
@@ -176,7 +183,7 @@ binary_fold nil cons =
 dispose (BDD x) =  
   Transaction $ lift $ void $ bdd_delref x
 
-fold_with_dispose nil cons = 
+binary_fold_with_dispose nil cons = 
    let run first [] = constant nil
        run first [x] = return x
        run first (x:y:ys) = do
