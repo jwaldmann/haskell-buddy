@@ -48,7 +48,7 @@ no_threats n = for (positions n) ( \ p ->
     B.and =<< forM (positions n) ( \ q ->
         if p /= q && threatens p q
         then do a <- B.unit p True ; b <- B.unit q False
-                B.implies a b
+                B.imp a b
         else B.constant True
              ) )
 
