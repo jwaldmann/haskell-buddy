@@ -72,3 +72,15 @@ library
     cbits/reorder.c
     cbits/tree.c
 
+test-suite buddy-placement
+  hs-source-dirs: examples
+  type: exitcode-stdio-1.0
+  main-is: Placement.hs
+  build-depends: base, containers, buddy
+
+test-suite buddy-queens
+  hs-source-dirs: examples
+  type: exitcode-stdio-1.0
+  main-is: Queens.hs
+  build-depends: base, containers, buddy
+  

@@ -30,8 +30,12 @@ adjacent (a,b) (c,d) =
   
 main = do
     args <- getArgs
-    let [ width, height ] = map read args :: [ Int ]
-        ps = positions width height
+    case map read args :: [Int] of
+      [] -> mainf 3 10
+      [width,height] -> mainf width height
+
+mainf width height = do
+    let ps = positions width height
     c <- B.run ps $ do
         bs <- sequence $ do
            p <- ps

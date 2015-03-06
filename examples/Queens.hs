@@ -53,8 +53,10 @@ no_threats n = for (positions n) ( \ p ->
              ) )
 
 main = do
-    [ arg ] <- getArgs
-    mainf $ read arg
+    args <- getArgs
+    case args of
+      [] -> mainf 8
+      [arg] -> mainf $ read arg
 
 mainf n = do 
     (c,m) <- B.run (positions n) $ do

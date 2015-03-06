@@ -1,3 +1,14 @@
+Haskell API for BuDDy library
+-----------------------------
+
+
+[![Build Status](https://travis-ci.org/jwaldmann/haskell-buddy.svg)](http://travis-ci.org/jwaldmann/haskell-buddy)
+
+This repository contains C sources for BuDDy, and `cabal install` will compile them.
+
+BuDDy uses global variables to hold the state, so this library can only be used from a single thread. 
+
+```
 ==========================================================================
                               *** BuDDy ***
                          Binary Decision Diagrams
@@ -122,6 +133,7 @@ Your machine may be setup to use the above directories automatically,
 so you might be able to do:
 
  g++ myfile.cc -o myfile -lbdd
+```
 
 
 
