@@ -13,6 +13,7 @@ cabal-version:       >=1.10
 homepage:            https://github.com/jwaldmann/haskell-buddy
 
 extra-source-files:
+  cbits/config.h
   cbits/bdd.h
   cbits/bddio.c
   cbits/bddop.c
