@@ -1,3 +1,7 @@
+# NOTE: cabal check is commented out below
+# as it would just complain about the license
+# which is AllRightsReserved (it cannot be GPL because of BuDDy?)
+
 # this file copied from https://github.com/treeowl/boxes/blob/master/.travis.yml
 
 env:
@@ -37,7 +41,7 @@ script:
 # (including tests/benchmarks)
  - cabal build
  - cabal test
- - cabal check
+ # - cabal check
 
 # tests that a source distribution can be generated
  - cabal sdist
